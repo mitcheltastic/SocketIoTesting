@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socket.IO Test</title>
+  <link rel="icon" href="data:," /> <!-- Prevent favicon.ico error -->
+</head>
+<body>
+  <h1>Socket.IO Real-Time Test</h1>
+  <p>Status: <span id="status">Not connected</span></p>
+  <p>Message: <span id="message">No messages received yet</span></p>
+
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    // Connect to the server's Socket.IO instance
+    const socket = io("http://localhost:3000"); // Replace with your server's URL if different
+
+    const statusSpan = document.getElementById("status");
+    const messageSpan = document.getElementById("message");
+
+    // Event: Connected
+    socket.on("connect", () => {
+      statusSpan.textContent = "Connected";
+      statusSpan.style.color = "green";
+    });
+
+    // Event: Disconnect
+    socket.on("disconnect", () => {
+      statusSpan.textContent = "Disconnected";
+      statusSpan.style.color = "red";
+    });
+
+    // Listen for the real-time `usageHistory_update` event
+    socket.on("usageHistory_update", (data) => {
+      messageSpan.textContent = `New Usage History: ${JSON.stringify(data)}`;
+    });
+
+    // Listen for any additional events
+    socket.on("message", (msg) => {
+      console.log("Message from server:", msg);
+    });
+  </script>
+</body>
+</html>
