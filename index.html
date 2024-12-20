@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Socket.IO Test</title>
+  <title>Socket.IO Real-Time Test</title>
   <link rel="icon" href="data:," /> <!-- Prevent favicon.ico error -->
 </head>
 <body>
@@ -31,12 +31,12 @@
       statusSpan.style.color = "red";
     });
 
-    // Listen for the real-time `usageHistory_update` event
-    socket.on("usageHistory_update", (data) => {
-      messageSpan.textContent = `New Usage History: ${JSON.stringify(data)}`;
+    // Listen for the real-time `availability_update` event
+    socket.on("availability_update", (data) => {
+      messageSpan.textContent = `New Availability Update: ${JSON.stringify(data)}`;
     });
 
-    // Listen for any additional events
+    // Additional generic event listener (optional)
     socket.on("message", (msg) => {
       console.log("Message from server:", msg);
     });
