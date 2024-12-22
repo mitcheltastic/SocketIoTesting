@@ -9,36 +9,31 @@
 <body>
   <h1>Socket.IO Real-Time Test</h1>
   <p>Status: <span id="status">Not connected</span></p>
-  <p>Message: <span id="message">No messages received yet</span></p>
 
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   <script>
-    // Connect to the server's Socket.IO instance
-    const socket = io("http://localhost:3000"); // Replace with your server's URL if different
+    const socket = io("https://sijaga-be.vercel.app", {
+      transports: ["polling", "websocket"], // Match backend transport
+    });
 
     const statusSpan = document.getElementById("status");
-    const messageSpan = document.getElementById("message");
 
-    // Event: Connected
     socket.on("connect", () => {
       statusSpan.textContent = "Connected";
       statusSpan.style.color = "green";
     });
 
-    // Event: Disconnect
     socket.on("disconnect", () => {
       statusSpan.textContent = "Disconnected";
       statusSpan.style.color = "red";
     });
 
-    // Listen for the real-time `availability_update` event
-    socket.on("availability_update", (data) => {
-      messageSpan.textContent = `New Availability Update: ${JSON.stringify(data)}`;
+    socket.on("message", (data) => {
+      console.log("Message from server:", data);
     });
 
-    // Additional generic event listener (optional)
-    socket.on("message", (msg) => {
-      console.log("Message from server:", msg);
+    socket.on("error", (err) => {
+      console.error("Socket.IO error:", err);
     });
   </script>
 </body>
