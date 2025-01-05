@@ -3,38 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Socket.IO Real-Time Test</title>
-  <link rel="icon" href="data:," /> <!-- Prevent favicon.ico error -->
+  <title>Usage History API with Socket.IO</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const API_BASE_URL = "https://sijaga-be.vercel.app"; // Replace with your API base URL
+    const SOCKET_URL = "https://sijaga-be.vercel.app"; // Replace with your Socket.IO server URL
+
+    let socket;
+
+    // Initialize Socket.IO connection
+    function initSocket() {
+      socket = io(SOCKET_URL, {
+        transports: ["websocket", "polling"],
+      });
+
+      socket.on("connect", () => {
+        console.log("Connected to Socket.IO server:", socket.id);
+      });
+
+      socket.on("disconnect", (reason) => {
+        console.log("Disconnected from Socket.IO server:", reason);
+      });
+
+      // Listen for usage history updates
+      socket.on("usage_history_update", (data) => {
+        console.log("Real-time update received:", data);
+
+        // Display the real-time update
+        const realTimeDiv = document.getElementById("realTimeUpdates");
+        realTimeDiv.innerHTML += `<p><strong>New Update:</strong> ${JSON.stringify(data)}</p>`;
+      });
+
+      // Handle any socket errors
+      socket.on("error", (err) => {
+        console.error("Socket.IO error:", err);
+      });
+    }
+
+    // Fetch usage history (GET request)
+    async function fetchUsageHistory() {
+      try {
+        const response = await fetch(`${API_BASE_URL}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log("Usage History:", data);
+
+        // Display the fetched data
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      } catch (error) {
+        console.error("Error fetching usage history:", error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+
+    // Add new usage history (POST request)
+    async function addUsageHistory() {
+      const newHistory = {
+        userId: "12345", // Example data; replace with your actual user ID
+        action: "Checked in", // Example action
+        timestamp: new Date().toISOString(),
+      };
+
+      try {
+        const response = await fetch(`${API_BASE_URL}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newHistory),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} - ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log("New History Added:", result);
+        alert("New history added successfully!");
+
+        // Refresh the usage history
+        fetchUsageHistory();
+      } catch (error) {
+        console.error("Error adding usage history:", error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+
+    // Initialize everything when the page loads
+    window.onload = () => {
+      initSocket();
+    };
+  </script>
 </head>
 <body>
-  <h1>Socket.IO Real-Time Test</h1>
-  <p>Status: <span id="status">Not connected</span></p>
+  <h1>Usage History API Test with Socket.IO</h1>
+  <button onclick="fetchUsageHistory()">Fetch Usage History</button>
+  <button onclick="addUsageHistory()">Add New Usage History</button>
 
-  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-  <script>
-    const socket = io("https://sijaga-be.vercel.app", {
-      transports: ["polling", "websocket"], // Match backend transport
-    });
+  <div id="result" style="margin-top: 20px; background: #f9f9f9; padding: 10px; border: 1px solid #ddd;">
+    <strong>Results will appear here...</strong>
+  </div>
 
-    const statusSpan = document.getElementById("status");
-
-    socket.on("connect", () => {
-      statusSpan.textContent = "Connected";
-      statusSpan.style.color = "green";
-    });
-
-    socket.on("disconnect", () => {
-      statusSpan.textContent = "Disconnected";
-      statusSpan.style.color = "red";
-    });
-
-    socket.on("message", (data) => {
-      console.log("Message from server:", data);
-    });
-
-    socket.on("error", (err) => {
-      console.error("Socket.IO error:", err);
-    });
-  </script>
+  <h2>Real-Time Updates</h2>
+  <div id="realTimeUpdates" style="margin-top: 20px; background: #e9f7e9; padding: 10px; border: 1px solid #7dd27d;">
+    <strong>Real-time updates will appear here...</strong>
+  </div>
 </body>
 </html>
